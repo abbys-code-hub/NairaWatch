@@ -16,21 +16,20 @@ def fetch_rate():
         return None
  
     ngn_rate = data.get("rates", {}).get("NGN")
-    time = data.get("time_last_update_utc")
+    updated = data.get("time_last_update_utc")
     if ngn_rate is None:
         print("Error: NGN rate not found in response")
         return None
-    return ngn_rate, time
+    return ngn_rate, updated
 
 
 
-# def format_message():
-
-# print(fetch_rate())
+def format_message(rate, updated):
+    updated_text = updated or "unknown"
+    return f"USD/NGN: {rate:,.2f}\nRate updated at: {updated_text}"
 
 if __name__ == "__main__":
-    rate, time = fetch_rate()
-    # rate = fetch_rate
-    if rate is not None:
-        print(f"USD/NGN: {rate:,.2f}\nRate updated at: (upadated {time})")
-        # print(f"{rate}")
+    result = fetch_rate()
+    if result is not None:
+        rate, updated = result
+        print(format_message(rate, updated))
