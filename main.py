@@ -1,8 +1,17 @@
 import requests
+import os
+from dotenv import load_dotenv
 
-# response = requests.get("https://open.er-api.com/v6/latest/USD", timeout=10).json()
-# print(response)
 
+load_dotenv()
+
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+
+
+if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+    print("Error: TELEGRAM_TOKEN and TELEGRAM_CHAT_ID must be set")
+    raise SystemExit(1)
 
 URL = "https://open.er-api.com/v6/latest/USD"
 
@@ -28,8 +37,33 @@ def format_message(rate, updated):
     updated_text = updated or "unknown"
     return f"USD/NGN: {rate:,.2f}\nRate updated at: {updated_text}"
 
+def send_telegram(text):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    try:
+        response = requests.post(
+            url,
+            data={"chat_id": TELEGRAM_CHAT_ID, "text": text}
+            timeout=10,
+        )
+        response.raise_for_status()
+    except requests.RequestException as e:
+        print(f"Error: could not send Telegram message ({type(e).__name__})")
+        return False
+    return True
+
+
 if __name__ == "__main__":
+    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+        print("Error: TELEGRAM_TOKEN and TELEGRAM_CHAT_ID must be set")
+        raise SystemExit(1)
+
+    
     result = fetch_rate()
-    if result is not None:
-        rate, updated = result
-        print(format_message(rate, updated))
+    if result is None:
+        raise SystemExit(1)
+    rate, updated = result
+    message = format_message(rate, updated)
+    print(message)
+
+    if not send_telegram(message):
+        raise SystemExit(1)
