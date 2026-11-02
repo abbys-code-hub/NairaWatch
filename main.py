@@ -42,7 +42,7 @@ def send_telegram(text):
     try:
         response = requests.post(
             url,
-            data={"chat_id": TELEGRAM_CHAT_ID, "text": text}
+            data={"chat_id": TELEGRAM_CHAT_ID, "text": text},
             timeout=10,
         )
         response.raise_for_status()
