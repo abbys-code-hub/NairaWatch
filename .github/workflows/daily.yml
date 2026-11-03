@@ -1,0 +1,28 @@
+name: Daily Naira Rate
+
+on:
+  schedule: 
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  send-rate:
+    runs-on: ubuntu-lates
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v7
+  
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+
+      - name: Run the script
+        env:
+          TELEGRAM_TOKEN: ${{ secrets. TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secretes.TELEGRAM_CHAT_ID }}
+        run: python3 main.py
