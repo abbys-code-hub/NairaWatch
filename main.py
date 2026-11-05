@@ -1,6 +1,12 @@
 import requests
 import os
 from dotenv import load_dotenv
+import csv
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
+from pathlib import Path
+
+RATES_FILE = Path("rates.csv")
 
 
 load_dotenv()
@@ -14,6 +20,35 @@ if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
     raise SystemExit(1)
 
 URL = "https://open.er-api.com/v6/latest/USD"
+
+def rate_date(updated):
+    try:
+        return parsedate_to_datetime(updated).date().isoformat()
+    except (TypeError, ValueError):
+        return datetime.now(timezone.utc).date().isoformat()
+
+def save_rate(rate, updated):
+    date_str = rate_date(updated)
+
+    needs_header = not RATES_FILE.exists() or RATES_FILE.stat().st_size == 0
+
+ 
+    if not needs_header:
+        with open(RATES_FILE, newline="") as f:
+            saved_dates = {row["date"] for row in csv.DictReader(f)}
+        if date_str in saved_dates:
+            print(f"\nRate for {date_str} already saved, skipping")
+            return False
+
+        # write_header = not RATES_FILE.exists()
+    with open(RATES_FILE, "a", newline="") as f:
+        writer = csv.writer(f)
+        if needs_header:
+            writer.writerow(["date", "rate"])
+        writer.writerow([date_str, rate])
+    print(f"\nSaved rate for {date_str}")
+    return True
+            
 
 def fetch_rate():
     try:
@@ -64,6 +99,9 @@ if __name__ == "__main__":
     rate, updated = result
     message = format_message(rate, updated)
     print(message)
+
+
+    save_rate(rate, updated)
 
     if not send_telegram(message):
         raise SystemExit(1)
