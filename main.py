@@ -20,11 +20,11 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 
-if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
-    print("Error: TELEGRAM_TOKEN and TELEGRAM_CHAT_ID must be set")
-    raise SystemExit(1)
+# if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+#     print("Error: TELEGRAM_TOKEN and TELEGRAM_CHAT_ID must be set")
+#     raise SystemExit(1)
 
-URL = "https://open.er-api.com/v6/latest/USD"
+# URL = "https://open.er-api.com/v6/latest/USD"
 
 
 logging.basicConfig(
