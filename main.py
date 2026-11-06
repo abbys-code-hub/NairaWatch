@@ -24,7 +24,7 @@ TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 #     print("Error: TELEGRAM_TOKEN and TELEGRAM_CHAT_ID must be set")
 #     raise SystemExit(1)
 
-# URL = "https://open.er-api.com/v6/latest/USD"
+URL = "https://open.er-api.com/v6/latest/USD"
 
 
 logging.basicConfig(
@@ -97,7 +97,7 @@ def fetch_rate():
                 logger.error("Fetch failed after %d attempts: %s", MAX_ATTEMPTS, type(e).__name__)
                 return None
             wait = RETRY_WAIT_SECONDS *2 ** (attempt - 1)
-            logger.warning("Attempt %d failed (%s), retrying in %ds", attempt, type(e))
+            logger.warning("Attempt %d failed (%s), retrying in %ds", attempt, type(e).__name__, wait)
             time.sleep(wait)
  
     ngn_rate = data.get("rates", {}).get("NGN")
