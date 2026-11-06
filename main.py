@@ -7,6 +7,8 @@ from email.utils import parsedate_to_datetime
 from pathlib import Path
 
 RATES_FILE = Path("rates.csv")
+ALERT_LOWER = 1200.0
+ALERT_UPPER = 2000.0
 
 
 load_dotenv()
@@ -72,6 +74,7 @@ def format_message(rate, updated):
     updated_text = updated or "unknown"
     return f"USD/NGN: {rate:,.2f}\nRate updated at: {updated_text}"
 
+
 def send_telegram(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     try:
@@ -86,6 +89,13 @@ def send_telegram(text):
         return False
     return True
 
+def check_thresholds(rate, lower=ALERT_LOWER, upper=ALERT_UPPER):
+    """Return an alert message if the rate is outside the range, else None."""
+    if rate < lower:
+        return f"ALERT: USD/NGN fell below {lower:,.2f} (now {rate:,.2f})"
+    if rate > upper:
+        return f"ALERT: USD/NGN rose above {upper:,.2f} (now {rate:,.2f})"
+    return None
 
 if __name__ == "__main__":
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
@@ -105,3 +115,9 @@ if __name__ == "__main__":
 
     if not send_telegram(message):
         raise SystemExit(1)
+
+    alert = check_thresholds(rate)
+    if alert:
+        print(alert)
+        if not send_telegram(alert):
+            raise SystemExit(1)
